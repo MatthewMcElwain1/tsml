@@ -18,7 +18,7 @@ public class AttributeMeasures {
         for (int[] Attribute : data) {
             //setup in loop cases variable and array list for value probabilities
             int cases = 0;
-            ArrayList<Double> attribute_value_probs = new ArrayList<Double>();
+
 
             //iterate through the array to find number of cases
             for (int value : Attribute) {
@@ -28,18 +28,15 @@ public class AttributeMeasures {
             //add to total number of cases out of loop
             total_cases += cases;
 
-            //calculate the local probability for each value
-            for (int value : Attribute) {
-                double probability = (double) value/cases;
-                attribute_value_probs.add(probability);
-            }
-
-            //calculate the entropy of each value
+            //calculate the local probability for each value and then the entropy
             double entropy = 0.0;
-            for (Double prob : attribute_value_probs) {
+            double prob;
+            for (int value : Attribute) {
+                prob = (double) value/cases;
                 if (prob != 0.0){
                     entropy += (prob*log2(prob));
                 }
+
             }
 
             //add the local number of cases and entropy (negative if not 0) to their array lists outside of loop
@@ -68,8 +65,27 @@ public class AttributeMeasures {
     }
 
     public static double measureInformationGainRatio(int[][] data){
-        double test = 1;
-        return test;
+
+        double ig = measureInformationGain(data);
+        int total_cases = 0;
+        double split_info = 0;
+
+        for (int[] attribute : data) {
+            for (int value : attribute) {
+                total_cases += value;
+            }
+        }
+
+        for (int[] attribute : data) {
+            int local_cases = 0;
+            for (int value : attribute) {
+                local_cases += value;
+            }
+            split_info += ((double)local_cases/total_cases)*log2((double)local_cases/total_cases);
+        }
+
+        return (double) Math.round(ig/-split_info*100)/100;
+
 
     }
 
@@ -92,8 +108,7 @@ public class AttributeMeasures {
     public static void main(String[] args) {
         int[][] data = {{4,0},{1,5}};
 
-        System.out.println(measureInformationGain(data));
-
+        System.out.println(measureInformationGainRatio(data));
 
     }
 
