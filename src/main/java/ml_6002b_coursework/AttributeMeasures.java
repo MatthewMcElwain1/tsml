@@ -116,6 +116,8 @@ public class AttributeMeasures {
         }
 
         ArrayList<Double> probabilities = new ArrayList<Double>();
+        ArrayList<Double> weighted_gini_measures = new ArrayList<Double>();
+
 
         for (int[] attribute : data) {
             int local_cases = 0;
@@ -124,16 +126,44 @@ public class AttributeMeasures {
                local_cases += value;
             }
 
-            probabilities.add(Math.pow((double) local_cases/total_cases, 2));
+            for (int value : attribute) {
+                probabilities.add(Math.pow((double) value/local_cases, 2));
+            }
+
+            double gini = 1;
+            for (Double probability : probabilities) {
+                gini -= probability;
+            }
+            probabilities.clear();
+            weighted_gini_measures.add(((double)local_cases/total_cases)*gini);
         }
 
-        double gini = 1;
-        for (Double probability : probabilities) {
-            gini -= probability;
+        //calculating the gini of the root node
+        ArrayList<Integer> root_cases = new ArrayList<Integer>();
+        for (int i = 0; i < data[0].length; i++){
+            root_cases.add(i,0);
         }
 
-        return gini;
+        int temp1;
+        for (int[] Attribute : data) {
+            for (int i = 0; i < Attribute.length; i++){
+                temp1 = root_cases.get(i);
+                temp1 += Attribute[i];
+                root_cases.remove(i);
+                root_cases.add(i,temp1);
+            }
+        }
 
+        double root_gini = 1;
+        for (Integer root_case : root_cases) {
+            root_gini -= Math.pow((double)root_case/total_cases, 2);
+        }
+
+        for (Double weighted_gini_measure : weighted_gini_measures) {
+            root_gini -= weighted_gini_measure;
+        }
+
+        return root_gini;
     }
 
     public static double measureChiSquared(int[][] data){
@@ -147,9 +177,9 @@ public class AttributeMeasures {
      * @param args the options for the attribute measure main
      */
     public static void main(String[] args) {
-        int[][] data = {{1,3},{0,2}};
+        int[][] data = {{4,2},{4,2}};
 
-        System.out.println(measureInformationGain(data));
+        System.out.println(measureGini(data));
 
     }
 
