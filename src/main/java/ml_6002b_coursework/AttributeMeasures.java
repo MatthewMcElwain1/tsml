@@ -159,6 +159,9 @@ public class AttributeMeasures {
             root_gini -= Math.pow((double)root_case/total_cases, 2);
         }
 
+
+        //-----------------------------------------------
+
         for (Double weighted_gini_measure : weighted_gini_measures) {
             root_gini -= weighted_gini_measure;
         }
@@ -167,8 +170,66 @@ public class AttributeMeasures {
     }
 
     public static double measureChiSquared(int[][] data){
-        double test = 1;
-        return test;
+        //calculating total cases
+        int total_cases = 0;
+
+        for (int[] attribute : data) {
+            for (int value : attribute) {
+                total_cases += value;
+            }
+        }
+
+        ArrayList<Integer> root_cases = new ArrayList<Integer>();
+        for (int i = 0; i < data[0].length; i++){
+            root_cases.add(i,0);
+        }
+
+        //calculating root cases and global probability
+        int temp1;
+        for (int[] Attribute : data) {
+            for (int i = 0; i < Attribute.length; i++){
+                temp1 = root_cases.get(i);
+                temp1 += Attribute[i];
+                root_cases.remove(i);
+                root_cases.add(i,temp1);
+            }
+        }
+
+        ArrayList<Double> class_probs = new ArrayList<Double>();
+        for (Integer root_case : root_cases) {
+            class_probs.add((double)root_case/total_cases);
+        }
+
+        //calculating expected values
+        ArrayList<Double> expected_values = new ArrayList<Double>();
+        for (int[] Attribute : data) {
+            int attribute_value_total = 0;
+            for (int value : Attribute) {
+                attribute_value_total += value;
+            }
+
+            for (int i = 0; i < Attribute.length; i++){
+                expected_values.add(attribute_value_total*class_probs.get(i));
+            }
+        }
+
+     //--------------------------------------------------------------
+
+        ArrayList<Double> node_values = new ArrayList<Double>();
+        int i = 0;
+        for (int[] Attribute : data) {
+            for (int value : Attribute) {
+                node_values.add((Math.pow((double)value-expected_values.get(i), 2))/expected_values.get(i));
+                i++;
+            }
+        }
+
+        double chi_squared = 0;
+        for (Double node_value : node_values) {
+            chi_squared += node_value;
+        }
+
+        return (double)Math.round(chi_squared*100)/100;
 
     }
     /**
@@ -177,9 +238,9 @@ public class AttributeMeasures {
      * @param args the options for the attribute measure main
      */
     public static void main(String[] args) {
-        int[][] data = {{4,2},{4,2}};
+        int[][] data = {{4,0},{1,5}};
 
-        System.out.println(measureGini(data));
+        System.out.println(measureChiSquared(data));
 
     }
 
