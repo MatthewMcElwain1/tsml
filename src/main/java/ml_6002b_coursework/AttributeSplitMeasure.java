@@ -11,6 +11,8 @@ import java.util.Enumeration;
  */
 public abstract class AttributeSplitMeasure {
 
+    public abstract double computeAttributeQuality(Instances data, Attribute att, Boolean useGain) throws Exception;
+
     public abstract double computeAttributeQuality(Instances data, Attribute att) throws Exception;
 
     /**

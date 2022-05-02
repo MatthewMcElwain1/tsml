@@ -1,4 +1,9 @@
 package ml_6002b_coursework;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import static weka.core.Utils.log2;
 
@@ -237,10 +242,17 @@ public class AttributeMeasures {
      *
      * @param args the options for the attribute measure main
      */
-    public static void main(String[] args) {
-        int[][] data = {{4,0},{1,5}};
+    public static void main(String[] args) throws Exception {
+        int[][] data = {{0,5},{1,0}};
 
-        System.out.println(measureChiSquared(data));
+        BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\Whiskey.arff"));
+        Instances test = new Instances(reader);
+
+        AttributeSplitMeasure SplitMeasure = new IGAttributeSplitMeasure();
+        System.out.println(SplitMeasure.computeAttributeQuality(test, test.attribute("Peaty"), false));
+
+
+        //System.out.println(measureInformationGain(data));
 
     }
 

@@ -1,0 +1,18 @@
+@RELATION Whiskey
+
+@ATTRIBUTE Peaty  {0,1}
+@ATTRIBUTE Woody   {0,1}
+@ATTRIBUTE Sweet  {0,1}
+@ATTRIBUTE class    {Islay,Speyside}
+@DATA
+
+1,0,1,Islay
+1,1,1,Islay
+1,0,0,Islay
+1,0,0,Islay
+0,1,0,Islay
+0,1,1,Speyside
+0,1,1,Speyside
+0,1,1,Speyside
+0,0,1,Speyside
+0,0,1,Speyside
