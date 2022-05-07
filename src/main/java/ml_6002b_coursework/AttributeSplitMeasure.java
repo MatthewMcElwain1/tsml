@@ -4,6 +4,7 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 
 /**
@@ -11,10 +12,40 @@ import java.util.Enumeration;
  */
 public abstract class AttributeSplitMeasure {
 
-    public abstract double computeAttributeQuality(Instances data, Attribute att, Boolean useGain) throws Exception;
-
     public abstract double computeAttributeQuality(Instances data, Attribute att) throws Exception;
 
+
+    public Instances[] splitDataOnNumeric(Instances data, Attribute att){
+        Instances[] splitDataNumeric = new Instances[2];
+        // https://medium.com/geekculture/handling-continuous-attributes-in-decision-trees-bbc044986621
+        // working out best split value
+        double[] test = data.attributeToDoubleArray(att.index());
+        double median;
+        Arrays.sort(test);
+        if (test.length%2==1){
+            median = test[(int) (test.length / 2 + 0.5)];
+            for (int i = 0; i < 2; i++) {
+                splitDataNumeric[i] = new Instances(data, (int) (test.length / 2 + 0.5));
+            }
+        }
+        else{
+            median = test[test.length/2];
+            for (int i = 0; i < 2; i++) {
+                splitDataNumeric[i] = new Instances(data, test.length/2);
+            }
+        }
+
+        // performing the split
+        for (Instance instance:data){
+            if (instance.value(att) >= median){
+                splitDataNumeric[0].add(instance);
+            }
+            else{
+                splitDataNumeric[1].add(instance);
+            }
+        }
+        return splitDataNumeric;
+    }
     /**
      * Splits a dataset according to the values of a nominal attribute.
      *

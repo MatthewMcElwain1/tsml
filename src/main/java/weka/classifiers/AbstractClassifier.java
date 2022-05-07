@@ -261,7 +261,7 @@ public abstract class AbstractClassifier
       "the console.";
   }
 
-  /**
+    /**
    * Returns the Capabilities of this classifier. Maximally permissive
    * capabilities are allowed by default. Derived classifiers should
    * override this method and first disable all capabilities and then

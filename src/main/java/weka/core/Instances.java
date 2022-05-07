@@ -177,7 +177,8 @@ public class Instances extends AbstractList<Instance>
     initialize(dataset, capacity);
   }
 
-  /**
+
+    /**
    * initializes with the header information of the given dataset and sets
    * the capacity of the set of instances.
    * 

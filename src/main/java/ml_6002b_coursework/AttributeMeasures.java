@@ -1,10 +1,11 @@
 package ml_6002b_coursework;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import static weka.core.Utils.log2;
 
 /**
@@ -248,8 +249,11 @@ public class AttributeMeasures {
         BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\Whiskey.arff"));
         Instances test = new Instances(reader);
 
-        AttributeSplitMeasure SplitMeasure = new IGAttributeSplitMeasure();
-        System.out.println(SplitMeasure.computeAttributeQuality(test, test.attribute("Peaty"), false));
+        BufferedReader test1 = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\test_data\\Chinatown.arff"));
+        Instances test2 = new Instances(test1);
+
+        AttributeSplitMeasure SplitMeasure = new GiniAttributeSplitMeasure();
+
 
 
         //System.out.println(measureInformationGain(data));

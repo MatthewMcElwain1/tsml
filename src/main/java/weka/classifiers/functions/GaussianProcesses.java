@@ -784,6 +784,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     return (String[]) result.toArray(new String[result.size()]);
   }
 
+
   /**
    * Returns the tip text for this property
    * 

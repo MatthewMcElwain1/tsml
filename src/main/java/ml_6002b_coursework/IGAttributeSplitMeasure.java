@@ -1,11 +1,12 @@
 package ml_6002b_coursework;
-
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 import static ml_6002b_coursework.AttributeMeasures.measureInformationGain;
 import static ml_6002b_coursework.AttributeMeasures.measureInformationGainRatio;
@@ -13,10 +14,23 @@ import static ml_6002b_coursework.AttributeMeasures.measureInformationGainRatio;
 
 public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
 
+    private final Boolean useGain;
+
+    public IGAttributeSplitMeasure(Boolean useGain) {
+        this.useGain = useGain;
+    }
+
     @Override
-    public double computeAttributeQuality(Instances data, Attribute att, Boolean useGain) throws Exception {
+    public double computeAttributeQuality(Instances data, Attribute att) throws Exception {
+        Instances[] split_data;
+        if (att.type() == 0){
+            split_data = splitDataOnNumeric(data, att);
+        }
+        else{
+            split_data = splitData(data, att);
+        }
+
         // first split the data by attribute value
-        Instances[] split_data = splitData(data, att);
         // setup attr split array
         int[][] attr_split_array = new int[split_data.length][];
         // loop through the split data
@@ -46,17 +60,28 @@ public class IGAttributeSplitMeasure extends AttributeSplitMeasure {
         }
     }
 
-    @Override
-    public double computeAttributeQuality(Instances data, Attribute att) throws Exception {
-        return 0;
-    }
 
     /**
      * Main method.
      *
      * @param args the options for the split measure main
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/Whiskey.arff"));
+        Instances data = new Instances(reader);
+
+        AttributeSplitMeasure SplitMeasure = new IGAttributeSplitMeasure(true);
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IG", "Peaty", SplitMeasure.computeAttributeQuality(data, data.attribute("Peaty")));
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IG", "Woody", SplitMeasure.computeAttributeQuality(data, data.attribute("Woody")));
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IG", "Sweet", SplitMeasure.computeAttributeQuality(data, data.attribute("Sweet")));
+
+        System.out.println("");
+
+        AttributeSplitMeasure SplitMeasure2 = new IGAttributeSplitMeasure(false);
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IGR", "Peaty", SplitMeasure2.computeAttributeQuality(data, data.attribute("Peaty")));
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IGR", "Woody", SplitMeasure2.computeAttributeQuality(data, data.attribute("Woody")));
+        System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "IGR", "Sweet", SplitMeasure2.computeAttributeQuality(data, data.attribute("Sweet")));
+
 
     }
 

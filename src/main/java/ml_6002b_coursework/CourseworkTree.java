@@ -1,8 +1,12 @@
 package ml_6002b_coursework;
-
 import weka.classifiers.AbstractClassifier;
 import weka.core.*;
+import weka.filters.Filter;
+import weka.filters.supervised.instance.StratifiedRemoveFolds;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Arrays;
 
 /**
@@ -11,7 +15,7 @@ import java.util.Arrays;
 public class CourseworkTree extends AbstractClassifier {
 
     /** Measure to use when selecting an attribute to split the data with. */
-    private AttributeSplitMeasure attSplitMeasure = new IGAttributeSplitMeasure();
+    private AttributeSplitMeasure attSplitMeasure;
 
     /** Maxiumum depth for the tree. */
     private int maxDepth = Integer.MAX_VALUE;
@@ -28,6 +32,25 @@ public class CourseworkTree extends AbstractClassifier {
         this.attSplitMeasure = attSplitMeasure;
     }
 
+    @Override
+    public void setOptions(String[] options) {
+        for (String option:options){
+            switch (option.toLowerCase()) {
+                case "gain":
+                    setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+                    break;
+                case "ratio":
+                    setAttSplitMeasure(new IGAttributeSplitMeasure(false));
+                    break;
+                case "gini":
+                    setAttSplitMeasure(new GiniAttributeSplitMeasure());
+                    break;
+                default:
+                    setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+                    break;
+            }
+        }
+    }
     /**
      * Sets the max depth for the classifier.
      *
@@ -138,7 +161,8 @@ public class CourseworkTree extends AbstractClassifier {
 
             // Loop through each attribute, finding the best one.
             for (int i = 0; i < data.numAttributes() - 1; i++) {
-                double gain = attSplitMeasure.computeAttributeQuality(data, data.attribute(i));
+                double gain;
+                gain = attSplitMeasure.computeAttributeQuality(data, data.attribute(i));
 
                 if (gain > bestGain) {
                     bestSplit = data.attribute(i);
@@ -245,7 +269,51 @@ public class CourseworkTree extends AbstractClassifier {
      *
      * @param args the options for the classifier main
      */
-    public static void main(String[] args) {
-        System.out.println("Not Implemented.");
+    public static void main(String[] args) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff"));
+        Instances data = new Instances(reader);
+        data.setClassIndex(data.numAttributes()-1);
+
+        // https://stackoverflow.com/questions/28123954/how-do-i-divide-a-dataset-into-training-and-test-sets-using-weka
+        StratifiedRemoveFolds filter = new StratifiedRemoveFolds();
+
+        String[] options = new String[6];
+
+        options[0] = "-N";
+        options[1] = Integer.toString(5);
+        options[2] = "-S";
+        options[3] = Integer.toString(1);
+        options[4] = "-F";
+        options[5] = Integer.toString(1);
+
+        filter.setOptions(options);
+        filter.setInputFormat(data);
+        filter.setInvertSelection(false);
+
+        Instances test_split = Filter.useFilter(data, filter);
+        filter.setInvertSelection(true);
+        Instances train_split = Filter.useFilter(data, filter);
+
+        CourseworkTree tree = new CourseworkTree();
+        tree.setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+        tree.buildClassifier(train_split);
+
+
+        int correct = 0;
+        int total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+
+        double accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on optdigits problem has test accuracy = %f", "IG", accuracy);
+
+
+
     }
 }
