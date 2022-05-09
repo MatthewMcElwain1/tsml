@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static ml_6002b_coursework.AttributeMeasures.measureGini;
 
@@ -43,6 +44,7 @@ public class GiniAttributeSplitMeasure extends AttributeSplitMeasure {
             }
             // adding the class dist array to the main split array
             attr_split_array[x] = class_dist;
+
         }
         // returning final number
         return measureGini(attr_split_array);
@@ -62,6 +64,13 @@ public class GiniAttributeSplitMeasure extends AttributeSplitMeasure {
         System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "GINI", "Peaty", SplitMeasure.computeAttributeQuality(data, data.attribute("Peaty")));
         System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "GINI", "Woody", SplitMeasure.computeAttributeQuality(data, data.attribute("Woody")));
         System.out.printf("measure %s for attribute %s splitting diagnosis = %f\n", "GINI", "Sweet", SplitMeasure.computeAttributeQuality(data, data.attribute("Sweet")));
+
+        BufferedReader reader1 = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff"));
+        Instances optDigits = new Instances(reader1);
+
+
+        System.out.println(SplitMeasure.computeAttributeQuality(optDigits, optDigits.attribute(15)));
+
     }
 
 }

@@ -12,10 +12,15 @@ import java.util.Enumeration;
  */
 public abstract class AttributeSplitMeasure {
 
+    private double median;
+
     public abstract double computeAttributeQuality(Instances data, Attribute att) throws Exception;
 
+    public double getMedian(){
+        return this.median;
+    }
 
-    public Instances[] splitDataOnNumeric(Instances data, Attribute att){
+    public Instances[] compute_best_split(Instances data, Attribute att){
         Instances[] splitDataNumeric = new Instances[2];
         // https://medium.com/geekculture/handling-continuous-attributes-in-decision-trees-bbc044986621
         // working out best split value
@@ -34,7 +39,12 @@ public abstract class AttributeSplitMeasure {
                 splitDataNumeric[i] = new Instances(data, test.length/2);
             }
         }
+        this.median = median;
+        return splitDataNumeric;
+    }
 
+    public Instances[] splitDataOnNumeric(Instances data, Attribute att){
+       Instances[] splitDataNumeric = compute_best_split(data, att);
         // performing the split
         for (Instance instance:data){
             if (instance.value(att) >= median){

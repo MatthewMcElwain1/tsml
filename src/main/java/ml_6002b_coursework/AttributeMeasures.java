@@ -249,8 +249,9 @@ public class AttributeMeasures {
         BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\Whiskey.arff"));
         Instances test = new Instances(reader);
 
-        BufferedReader test1 = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\test_data\\Chinatown.arff"));
+        BufferedReader test1 = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff"));
         Instances test2 = new Instances(test1);
+
 
         AttributeSplitMeasure SplitMeasure = new GiniAttributeSplitMeasure();
 

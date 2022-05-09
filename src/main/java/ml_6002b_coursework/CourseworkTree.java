@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * A basic decision tree classifier for use in machine learning coursework (6002B).
@@ -162,6 +163,7 @@ public class CourseworkTree extends AbstractClassifier {
             // Loop through each attribute, finding the best one.
             for (int i = 0; i < data.numAttributes() - 1; i++) {
                 double gain;
+
                 gain = attSplitMeasure.computeAttributeQuality(data, data.attribute(i));
 
                 if (gain > bestGain) {
@@ -172,7 +174,14 @@ public class CourseworkTree extends AbstractClassifier {
 
             // If we found an attribute to split on, create child nodes.
             if (bestSplit != null) {
-                Instances[] split = attSplitMeasure.splitData(data, bestSplit);
+                Instances[] split;
+                if (bestSplit.type() == 0){
+                   split = attSplitMeasure.splitDataOnNumeric(data, bestSplit);
+                }
+                else{
+                   split = attSplitMeasure.splitData(data, bestSplit);
+                }
+
                 children = new TreeNode[split.length];
 
                 // Create a child for each value in the selected attribute, and determine whether it is a leaf or not.
@@ -218,6 +227,15 @@ public class CourseworkTree extends AbstractClassifier {
             if (bestSplit == null) {
                 return leafDistribution;
             } else {
+                if (bestSplit.isNumeric()){
+                    if(inst.value(bestSplit) < attSplitMeasure.getMedian()){
+                        return children[1].distributionForInstance(inst);
+                    }
+                    else{
+                        return children[0].distributionForInstance(inst);
+                    }
+
+                }
                 return children[(int) inst.value(bestSplit)].distributionForInstance(inst);
             }
         }
@@ -270,19 +288,22 @@ public class CourseworkTree extends AbstractClassifier {
      * @param args the options for the classifier main
      */
     public static void main(String[] args) throws Exception {
+        // --------------------optdigits problems-------------------------------
         BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff"));
         Instances data = new Instances(reader);
         data.setClassIndex(data.numAttributes()-1);
+
 
         // https://stackoverflow.com/questions/28123954/how-do-i-divide-a-dataset-into-training-and-test-sets-using-weka
         StratifiedRemoveFolds filter = new StratifiedRemoveFolds();
 
         String[] options = new String[6];
-
+        Random rand = new Random();
+        int seed = rand.nextInt(5000)+1;
         options[0] = "-N";
         options[1] = Integer.toString(5);
         options[2] = "-S";
-        options[3] = Integer.toString(1);
+        options[3] = Integer.toString(seed);
         options[4] = "-F";
         options[5] = Integer.toString(1);
 
@@ -295,6 +316,9 @@ public class CourseworkTree extends AbstractClassifier {
         Instances train_split = Filter.useFilter(data, filter);
 
         CourseworkTree tree = new CourseworkTree();
+
+
+        // -------------------IG optdigits problem-------------------------------
         tree.setAttSplitMeasure(new IGAttributeSplitMeasure(true));
         tree.buildClassifier(train_split);
 
@@ -309,11 +333,122 @@ public class CourseworkTree extends AbstractClassifier {
             total+=1;
         }
 
-
         double accuracy = (double) correct/total;
-        System.out.printf("DT using measure %s on optdigits problem has test accuracy = %f", "IG", accuracy);
+        System.out.printf("DT using measure %s on optdigits problem has test accuracy = %f\n", "IG", accuracy);
+
+        // ------------------Chi squared optdigits problem------------------------
+        tree.setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+        tree.buildClassifier(train_split);
+
+        correct = 0;
+        total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on optdigits problem has test accuracy = %f\n", "Chi", accuracy);
+
+        // ----------------Gini index optdigits problem---------------------------
+        tree.setAttSplitMeasure(new GiniAttributeSplitMeasure());
+        tree.buildClassifier(train_split);
+
+        correct = 0;
+        total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on optdigits problem has test accuracy = %f\n", "Gini", accuracy);
 
 
+        // --------------------China town problems-----------------------------
+        reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff"));
+        data = new Instances(reader);
+        data.setClassIndex(data.numAttributes()-1);
+
+        // https://stackoverflow.com/questions/28123954/how-do-i-divide-a-dataset-into-training-and-test-sets-using-weka
+        filter = new StratifiedRemoveFolds();
+
+        options = new String[6];
+
+        options[0] = "-N";
+        options[1] = Integer.toString(5);
+        options[2] = "-S";
+        options[3] = Integer.toString(seed);
+        options[4] = "-F";
+        options[5] = Integer.toString(1);
+
+        filter.setOptions(options);
+        filter.setInputFormat(data);
+        filter.setInvertSelection(false);
+
+        test_split = Filter.useFilter(data, filter);
+        filter.setInvertSelection(true);
+        train_split = Filter.useFilter(data, filter);
+
+        tree = new CourseworkTree();
+
+
+        // -------------------IG China town problem-------------------------------
+        tree.setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+        tree.buildClassifier(train_split);
+
+        correct = 0;
+        total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on chinatown problem has test accuracy = %f\n", "IG", accuracy);
+
+        // ------------------Chi squared china town problem------------------------
+        tree.setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+        tree.buildClassifier(train_split);
+
+        correct = 0;
+        total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on chinatown problem has test accuracy = %f\n", "Chi", accuracy);
+
+        // ----------------Gini index china town problem---------------------------
+        tree.setAttSplitMeasure(new GiniAttributeSplitMeasure());
+        tree.buildClassifier(train_split);
+
+        correct = 0;
+        total = 0;
+        for (Instance instance:test_split){
+            double prediction = tree.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("DT using measure %s on chinatown problem has test accuracy = %f\n", "Gini", accuracy);
 
     }
 }
