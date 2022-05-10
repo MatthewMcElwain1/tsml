@@ -5,14 +5,13 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SingleIndex;
 import weka.filters.Filter;
 import weka.filters.supervised.instance.StratifiedRemoveFolds;
 import weka.filters.unsupervised.attribute.Remove;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 
 public class TreeEnsemble extends AbstractClassifier {
@@ -24,6 +23,8 @@ public class TreeEnsemble extends AbstractClassifier {
     ArrayList<CourseworkTree> classifiers = new ArrayList<CourseworkTree>();
 
     int[][] att_selections;
+
+    Instances input_format;
 
     public TreeEnsemble(int numTrees, double subset_percentage){
         this.subset_percentage = subset_percentage;
@@ -40,12 +41,12 @@ public class TreeEnsemble extends AbstractClassifier {
         // creating random subsets and removing random attributes
         Random rand = new Random();
 
+        input_format = data;
         att_selections = new int[numTrees][(int) (data.numAttributes()*subset_percentage)+1];
 
         int att_index;
 
         int[] atts_to_keep = new int[(int) (data.numAttributes()*subset_percentage)+1];
-
 
         Remove removeFilter = new Remove();
 
@@ -93,12 +94,49 @@ public class TreeEnsemble extends AbstractClassifier {
             tree.buildClassifier(fold);
             classifiers.add(tree);
         }
+    }
+
+    public double classifyInstance(Instance instance) throws Exception {
+        Hashtable<Double, Integer> votes = new Hashtable<Double, Integer>();
 
 
+        instance.setDataset(input_format);
+        double prediction;
+        for (int i =0; i < classifiers.size(); i++){
+//            Instance temp = instance.;
+//            // System.out.println(att_selections.length);
+//            for (int x = 0, y=1; x < att_selections.length; x++,y++){
+//                temp.deleteAttributeAt(att_selections[i][x]);
+//                System.out.println(temp.numAttributes());
+//            }
 
+            Remove removeFilter = new Remove();
+            removeFilter.setAttributeIndicesArray(att_selections[i]);
+            removeFilter.setInvertSelection(true);
+            removeFilter.setInputFormat(input_format);
+            removeFilter.input(instance);
+            Instance temp = removeFilter.output();
 
+            prediction = classifiers.get(i).classifyInstance(temp);
+            try{
+                votes.put(prediction, votes.get(prediction)+1);
+            }catch(Exception exception){
+                votes.put(prediction, 1);
+            }
+        }
 
+        Set<Double> classes = votes.keySet();
+        int majority_vote = 0;
+        double class_prediction = 0.0;
+        for(Double class_attr:classes){
+            if (votes.get(class_attr) >= majority_vote){
+                class_prediction = class_attr;
+                majority_vote = votes.get(class_attr);
+            }
+        }
 
+        System.out.println(votes);
+        return class_prediction;
     }
 
     public static void main(String[] args) throws Exception {
@@ -108,5 +146,6 @@ public class TreeEnsemble extends AbstractClassifier {
 
         TreeEnsemble ensemble = new TreeEnsemble();
         ensemble.buildClassifier(data);
+        System.out.println(ensemble.classifyInstance(data.get(0)));
     }
 }
