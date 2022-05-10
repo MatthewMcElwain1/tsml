@@ -183,14 +183,98 @@ public class TreeEnsemble extends AbstractClassifier {
     }
 
     public static void main(String[] args) throws Exception {
+        // ----------------ensemble optdigits problem---------------
         BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff"));
         Instances data = new Instances(reader);
         data.setClassIndex(data.numAttributes()-1);
 
+        StratifiedRemoveFolds filter = new StratifiedRemoveFolds();
+
+        String[] options = new String[6];
+        Random rand = new Random();
+        int seed = rand.nextInt(5000)+1;
+        options[0] = "-N";
+        options[1] = Integer.toString(5);
+        options[2] = "-S";
+        options[3] = Integer.toString(seed);
+        options[4] = "-F";
+        options[5] = Integer.toString(1);
+
+        filter.setOptions(options);
+        filter.setInputFormat(data);
+        filter.setInvertSelection(false);
+
+        Instances test_split = Filter.useFilter(data, filter);
+        filter.setInvertSelection(true);
+        Instances train_split = Filter.useFilter(data, filter);
+
         TreeEnsemble ensemble = new TreeEnsemble();
-        ensemble.buildClassifier(data);
+        ensemble.buildClassifier(train_split);
         ensemble.setAverageDistributions(true);
-        System.out.println(ensemble.classifyInstance(data.get(0)));
+
+        int correct = 0;
+        int total = 0;
+
+        for (int i=0; i < 5; i++){
+            System.out.println(Arrays.toString(ensemble.distributionForInstance(test_split.get(i))));
+        }
+        for (Instance instance:test_split){
+            double prediction = ensemble.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        double accuracy = (double) correct/total;
+        System.out.printf("Ensemble on optdigits problem has test accuracy = %f\n", accuracy);
+
+        // ----------------ensemble chinatown problem------------
+
+        reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff"));
+        data = new Instances(reader);
+        data.setClassIndex(data.numAttributes()-1);
+
+        filter = new StratifiedRemoveFolds();
+
+        options = new String[6];
+        rand = new Random();
+        seed = rand.nextInt(5000)+1;
+        options[0] = "-N";
+        options[1] = Integer.toString(5);
+        options[2] = "-S";
+        options[3] = Integer.toString(seed);
+        options[4] = "-F";
+        options[5] = Integer.toString(1);
+
+        filter.setOptions(options);
+        filter.setInputFormat(data);
+        filter.setInvertSelection(false);
+
+        test_split = Filter.useFilter(data, filter);
+        filter.setInvertSelection(true);
+        train_split = Filter.useFilter(data, filter);
+
+        ensemble = new TreeEnsemble();
+        ensemble.buildClassifier(train_split);
+        ensemble.setAverageDistributions(true);
+
+        correct = 0;
+        total = 0;
+
+        for (int i=0; i < 5; i++){
+            System.out.println(Arrays.toString(ensemble.distributionForInstance(test_split.get(i))));
+        }
+        for (Instance instance:test_split){
+            double prediction = ensemble.classifyInstance(instance);
+            if (instance.classValue() == prediction){
+                correct+=1;
+            }
+            total+=1;
+        }
+
+        accuracy = (double) correct/total;
+        System.out.printf("Ensemble on chinatown problem has test accuracy = %f\n", accuracy);
 
     }
 }
