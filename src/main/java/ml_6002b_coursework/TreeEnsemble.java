@@ -98,18 +98,9 @@ public class TreeEnsemble extends AbstractClassifier {
 
     public double classifyInstance(Instance instance) throws Exception {
         Hashtable<Double, Integer> votes = new Hashtable<Double, Integer>();
-
-
         instance.setDataset(input_format);
         double prediction;
         for (int i =0; i < classifiers.size(); i++){
-//            Instance temp = instance.;
-//            // System.out.println(att_selections.length);
-//            for (int x = 0, y=1; x < att_selections.length; x++,y++){
-//                temp.deleteAttributeAt(att_selections[i][x]);
-//                System.out.println(temp.numAttributes());
-//            }
-
             Remove removeFilter = new Remove();
             removeFilter.setAttributeIndicesArray(att_selections[i]);
             removeFilter.setInvertSelection(true);
@@ -139,6 +130,33 @@ public class TreeEnsemble extends AbstractClassifier {
         return class_prediction;
     }
 
+    public double[] distributionForInstance(Instance instance) throws Exception {
+        double[][] test = new double[classifiers.size()][];
+        instance.setDataset(input_format);
+
+        for (int i = 0; i < classifiers.size(); i++){
+            Remove removeFilter = new Remove();
+            removeFilter.setAttributeIndicesArray(att_selections[i]);
+            removeFilter.setInvertSelection(true);
+            removeFilter.setInputFormat(input_format);
+            removeFilter.input(instance);
+            Instance temp = removeFilter.output();
+
+
+            test[i] = classifiers.get(i).distributionForInstance(temp);
+        }
+
+        double[] probabilities = new double[instance.numClasses()];
+
+        for (double[] doubles : test) {
+            for (int y = 0; y < doubles.length; y++) {
+                probabilities[y] += (doubles[y] / numTrees);
+            }
+        }
+
+        return probabilities;
+    }
+
     public static void main(String[] args) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/optdigits.arff"));
         Instances data = new Instances(reader);
@@ -146,6 +164,7 @@ public class TreeEnsemble extends AbstractClassifier {
 
         TreeEnsemble ensemble = new TreeEnsemble();
         ensemble.buildClassifier(data);
-        System.out.println(ensemble.classifyInstance(data.get(0)));
+        System.out.println(Arrays.toString(ensemble.distributionForInstance(data.get(0))));
+
     }
 }
