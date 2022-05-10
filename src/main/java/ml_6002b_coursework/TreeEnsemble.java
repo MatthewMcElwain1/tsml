@@ -16,9 +16,11 @@ import java.util.*;
 
 public class TreeEnsemble extends AbstractClassifier {
 
-    private final int numTrees;
+    private int numTrees;
 
-    private final double subset_percentage;
+    private boolean averageDistributions;
+
+    private double subset_percentage;
 
     ArrayList<CourseworkTree> classifiers = new ArrayList<CourseworkTree>();
 
@@ -26,14 +28,22 @@ public class TreeEnsemble extends AbstractClassifier {
 
     Instances input_format;
 
-    public TreeEnsemble(int numTrees, double subset_percentage){
-        this.subset_percentage = subset_percentage;
-        this.numTrees = numTrees;
-    }
-
     public TreeEnsemble(){
         this.numTrees = 50;
         this.subset_percentage = 0.5;
+        this.averageDistributions = false;
+    }
+
+    public void setNumTrees(int numTrees){
+        this.numTrees = numTrees;
+    }
+
+    public void setAverageDistributions(boolean averageDistributions){
+        this.averageDistributions = averageDistributions;
+    }
+
+    public void setSubset_percentage(double subset_percentage){
+        this.subset_percentage = subset_percentage;
     }
 
     @Override
@@ -97,6 +107,22 @@ public class TreeEnsemble extends AbstractClassifier {
     }
 
     public double classifyInstance(Instance instance) throws Exception {
+
+        if (averageDistributions){
+            double[] probabilities = distributionForInstance(instance);
+            int highest_probability_class = 0;
+            double probability_temp_holder = 0;
+
+            for (int x=0; x < probabilities.length; x++){
+                if (probabilities[x] > probability_temp_holder){
+                    probability_temp_holder = probabilities[x];
+                    highest_probability_class = x;
+                }
+            }
+            return highest_probability_class;
+
+        }
+        else{
         Hashtable<Double, Integer> votes = new Hashtable<Double, Integer>();
         instance.setDataset(input_format);
         double prediction;
@@ -126,8 +152,8 @@ public class TreeEnsemble extends AbstractClassifier {
             }
         }
 
-        System.out.println(votes);
         return class_prediction;
+    }
     }
 
     public double[] distributionForInstance(Instance instance) throws Exception {
@@ -153,7 +179,6 @@ public class TreeEnsemble extends AbstractClassifier {
                 probabilities[y] += (doubles[y] / numTrees);
             }
         }
-
         return probabilities;
     }
 
@@ -164,7 +189,8 @@ public class TreeEnsemble extends AbstractClassifier {
 
         TreeEnsemble ensemble = new TreeEnsemble();
         ensemble.buildClassifier(data);
-        System.out.println(Arrays.toString(ensemble.distributionForInstance(data.get(0))));
+        ensemble.setAverageDistributions(true);
+        System.out.println(ensemble.classifyInstance(data.get(0)));
 
     }
 }
