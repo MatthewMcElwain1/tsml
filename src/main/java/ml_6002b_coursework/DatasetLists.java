@@ -9,7 +9,6 @@ public class DatasetLists {
 
     public static String[] nominalAttributeProblems={
             "balance-scale",
-            "car-evaluation",
             "chess-krvk",
             "chess-krvkp",
             "connect-4",
