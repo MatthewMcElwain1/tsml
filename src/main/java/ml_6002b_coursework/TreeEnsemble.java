@@ -49,6 +49,7 @@ public class TreeEnsemble extends AbstractClassifier {
     @Override
     public void buildClassifier(Instances data) throws Exception {
         // creating random subsets and removing random attributes
+        classifiers = new ArrayList<CourseworkTree>();
         Random rand = new Random();
 
         input_format = data;
@@ -56,7 +57,7 @@ public class TreeEnsemble extends AbstractClassifier {
 
         int att_index;
 
-        int[] atts_to_keep = new int[(int) (data.numAttributes()*subset_percentage)+1];
+        int[] atts_to_keep = new int[((int) (data.numAttributes()*subset_percentage))+1];
 
         Remove removeFilter = new Remove();
 
