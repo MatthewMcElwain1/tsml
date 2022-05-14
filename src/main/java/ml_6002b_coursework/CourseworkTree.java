@@ -34,24 +34,60 @@ public class CourseworkTree extends AbstractClassifier {
     }
 
     @Override
-    public void setOptions(String[] options) {
-        for (String option:options){
-            switch (option.toLowerCase()) {
-                case "gain":
-                    setAttSplitMeasure(new IGAttributeSplitMeasure(true));
-                    break;
-                case "ratio":
-                    setAttSplitMeasure(new IGAttributeSplitMeasure(false));
-                    break;
-                case "gini":
-                    setAttSplitMeasure(new GiniAttributeSplitMeasure());
-                    break;
-                default:
-                    setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
-                    break;
-            }
+    public void setOptions(String[] options) throws Exception {
+        String     tmpStr;
+
+        tmpStr = Utils.getOption('S', options);
+
+        switch (tmpStr) {
+            case "gain":
+                setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+                break;
+            case "ratio":
+                setAttSplitMeasure(new IGAttributeSplitMeasure(false));
+                break;
+            case "gini":
+                setAttSplitMeasure(new GiniAttributeSplitMeasure());
+                break;
+            case "chi":
+                setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+            default:
+                setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+                break;
         }
+
+        tmpStr = Utils.getOption('D', options);
+
+        switch (tmpStr) {
+            case "1":
+                setMaxDepth(1);
+                break;
+            case "2":
+                setMaxDepth(2);
+                break;
+            case "4":
+                setMaxDepth(4);
+                break;
+            case "8":
+                setMaxDepth(8);
+                break;
+            case "16":
+                setMaxDepth(16);
+                break;
+            case "32":
+                setMaxDepth(32);
+                break;
+            case "64":
+                setMaxDepth(64);
+                break;
+            default:
+                setMaxDepth(Integer.MAX_VALUE);
+                break;
+        }
+
+
     }
+
     /**
      * Sets the max depth for the classifier.
      *
