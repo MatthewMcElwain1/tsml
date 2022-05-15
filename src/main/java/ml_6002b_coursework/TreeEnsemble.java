@@ -102,6 +102,33 @@ public class TreeEnsemble extends AbstractClassifier {
                     tree.setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
                     break;
             }
+
+            switch(rand.nextInt(7)+1){
+                case 1:
+                    tree.setMaxDepth(1);
+                    break;
+                case 2:
+                    tree.setMaxDepth(2);
+                    break;
+                case 3:
+                    tree.setMaxDepth(4);
+                    break;
+                case 4:
+                    tree.setMaxDepth(8);
+                    break;
+                case 5:
+                    tree.setMaxDepth(16);
+                    break;
+                case 6:
+                    tree.setMaxDepth(32);
+                    break;
+                case 7:
+                    tree.setMaxDepth(64);
+                    break;
+                default:
+                    tree.setMaxDepth(Integer.MAX_VALUE);
+                    break;
+            }
             tree.buildClassifier(fold);
             classifiers.add(tree);
         }

@@ -16,7 +16,7 @@ import java.util.Random;
 public class CourseworkTree extends AbstractClassifier {
 
     /** Measure to use when selecting an attribute to split the data with. */
-    private AttributeSplitMeasure attSplitMeasure;
+    private AttributeSplitMeasure attSplitMeasure = new IGAttributeSplitMeasure(true);
 
     /** Maxiumum depth for the tree. */
     private int maxDepth = Integer.MAX_VALUE;

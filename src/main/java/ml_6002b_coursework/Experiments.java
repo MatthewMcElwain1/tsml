@@ -3,6 +3,7 @@ package ml_6002b_coursework;
 import evaluation.tuning.ParameterResults;
 import evaluation.tuning.ParameterSpace;
 import evaluation.tuning.Tuner;
+import org.checkerframework.checker.units.qual.C;
 import weka.classifiers.trees.Id3;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
@@ -344,52 +345,53 @@ public class Experiments {
 
             // --------------- coursework ensemble---------------
 
-//            TreeEnsemble ensemble = new TreeEnsemble();
-//
-//            correct = 0;
-//            total = 0;
-//            accuracy = 0;
-//
-//            for (int i = 0; i < discrete_train_splits.length; i++) {
-//                ensemble.buildClassifier(discrete_train_splits[i]);
-//
-//                for (int x = 0; x < discrete_test_splits[i].numInstances(); x++) {
-//
-//                    prediction = ensemble.classifyInstance(discrete_test_splits[i].get(x));
-//
-//                    if (discrete_test_splits[i].get(x).classValue() == prediction) {
-//                        correct += 1;
-//                    }
-//                    total++;
-//                }
-//                accuracy += ((double) correct / total)/discrete_test_splits.length;
-//            }
-//
-//            System.out.printf("Coursework ensemble averaged accuracy on discrete = %f\n", accuracy);
-//
-//            correct = 0;
-//            total = 0;
-//            accuracy = 0;
-//
-//            for (int i = 0; i < continuous_train_splits.length; i++) {
-//                ensemble.buildClassifier(continuous_train_splits[i]);
-//
-//                for (int x = 0; x < continuous_test_splits[i].numInstances(); x++) {
-//                    prediction = ensemble.classifyInstance(continuous_test_splits[i].get(x));
-//                    if (continuous_test_splits[i].get(x).classValue() == prediction) {
-//                        correct += 1;
-//                    }
-//                    total++;
-//                }
-//                accuracy += ((double) correct / total)/continuous_test_splits.length;
-//            }
-//
-//            System.out.printf("Coursework ensemble averaged accuracy on continuous = %f\n", accuracy);
+            TreeEnsemble ensemble = new TreeEnsemble();
+
+            correct = 0;
+            total = 0;
+            accuracy = 0;
+
+            for (int i = 0; i < discrete_train_splits.length; i++) {
+                ensemble.buildClassifier(discrete_train_splits[i]);
+
+                for (int x = 0; x < discrete_test_splits[i].numInstances(); x++) {
+
+                    prediction = ensemble.classifyInstance(discrete_test_splits[i].get(x));
+
+                    if (discrete_test_splits[i].get(x).classValue() == prediction) {
+                        correct += 1;
+                    }
+                    total++;
+                }
+                accuracy += ((double) correct / total)/discrete_test_splits.length;
+            }
+
+            System.out.printf("Coursework ensemble averaged accuracy on discrete = %f\n", accuracy);
+
+            correct = 0;
+            total = 0;
+            accuracy = 0;
+
+            for (int i = 0; i < continuous_train_splits.length; i++) {
+                ensemble.buildClassifier(continuous_train_splits[i]);
+
+                for (int x = 0; x < continuous_test_splits[i].numInstances(); x++) {
+                    prediction = ensemble.classifyInstance(continuous_test_splits[i].get(x));
+                    if (continuous_test_splits[i].get(x).classValue() == prediction) {
+                        correct += 1;
+                    }
+                    total++;
+                }
+                accuracy += ((double) correct / total)/continuous_test_splits.length;
+            }
+
+            System.out.printf("Coursework ensemble averaged accuracy on continuous = %f\n", accuracy);
 
 
             CourseworkTree tree = new CourseworkTree();
             Tuner tuner = new Tuner();
             ParameterSpace params = new ParameterSpace();
+            ParameterResults results;
 
             String[] splitMeasure_values = new String[4];
             splitMeasure_values[0] = "gain";
@@ -410,40 +412,64 @@ public class Experiments {
             params.addParameter("S", splitMeasure_values);
             params.addParameter("D", maxDepth_values);
 
+            correct = 0;
+            total = 0;
+            accuracy = 0;
 
-            ParameterResults results = tuner.tune(tree, discrete_train_splits[2], params);
-            System.out.println(results.paras);
-//            options = new String[2];
-//            options[0] = "S";
-//            options[1] = "gain";
-//
-//
-//            tree.setOptions(options);
+            String[] options = new String[4];
+            options[0] = "S";
+            options[2] = "D";
+
+            for (int i = 0; i < discrete_train_splits.length; i++) {
+                results = tuner.tune(tree, discrete_train_splits[i], params);
+                options[1] = results.paras.getParameterValue("S");
+                options[3] = results.paras.getParameterValue("D");
+                tree.setOptions(options);
+                tree.buildClassifier(discrete_train_splits[i]);
+
+                for (int x = 0; x < discrete_test_splits[i].numInstances(); x++) {
+                    prediction = tree.classifyInstance(discrete_test_splits[i].get(x));
+                    if (discrete_test_splits[i].get(x).classValue() == prediction) {
+                        correct += 1;
+                    }
+                    total++;
+                }
+                accuracy += ((double) correct / total)/discrete_test_splits.length;
+            }
+
+            System.out.printf("Tuned tree averaged accuracy on discrete = %f\n", accuracy);
+
+            correct = 0;
+            total = 0;
+            accuracy = 0;
+
+            for (int i = 0; i < continuous_train_splits.length; i++) {
+                results = tuner.tune(tree, continuous_train_splits[i], params);
+                options[1] = results.paras.getParameterValue("S");
+                options[3] = results.paras.getParameterValue("D");
+                tree.setOptions(options);
+                tree.buildClassifier(continuous_train_splits[i]);
+
+                for (int x = 0; x < continuous_test_splits[i].numInstances(); x++) {
+                    prediction = tree.classifyInstance(continuous_test_splits[i].get(x));
+                    if (continuous_test_splits[i].get(x).classValue() == prediction) {
+                        correct += 1;
+                    }
+                    total++;
+                }
+                accuracy += ((double) correct / total)/continuous_test_splits.length;
+            }
+
+            System.out.printf("Tuned tree averaged accuracy on continuous = %f\n", accuracy);
 
 
 
 
 
-//            for (Instances instances:discrete_train_splits){
-//                tree.buildClassifier(instances);
-//
-//                for (int i = 0; i < instances.numAttributes(); i++){
-//                    params.addParameter(String.format("attibute_%d", i), instances);
-//                }
-//                tuner.tune(tree, instances, params);
-//
-//            }
-//
-//            tuner.tune(tree, discrete_train_splits[0], params);
 
-//
-//            for (int i = 0; i < discrete_train_splits[0].numAttributes(); i++){
-//                params.addParameter(String.format("attibute_%d", i), discrete_train_splits[0]);
-//            }
-//            tuner.tune(tree, discrete_train_splits[0], params);
-//
-//
-//            tuner.tune(tree, discrete_train_splits[0], params);
+
+
+
 
 
         }
