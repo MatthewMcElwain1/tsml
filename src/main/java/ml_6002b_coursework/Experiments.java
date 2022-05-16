@@ -1,18 +1,21 @@
 package ml_6002b_coursework;
-
 import evaluation.tuning.ParameterResults;
 import evaluation.tuning.ParameterSpace;
 import evaluation.tuning.Tuner;
-import org.checkerframework.checker.units.qual.C;
-import weka.classifiers.trees.Id3;
-import weka.classifiers.trees.J48;
+import experiments.ExperimentalArguments;
+import experiments.data.DatasetLoading;
+import machine_learning.classifiers.tuned.TunedClassifier;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.meta.RotationForest;
+import weka.classifiers.trees.*;
 import weka.core.Instances;
+import weka.core.matrix.LinearRegression;
 import weka.filters.Filter;
 import weka.filters.supervised.instance.StratifiedRemoveFolds;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -132,6 +135,15 @@ public class Experiments {
         Instances[] continuous_train_splits = test_train_splits[2];
         Instances[] continuous_test_splits = test_train_splits[3];
 
+
+        FileWriter results_file = new FileWriter("src/main/java/ml_6002b_coursework/experiment_results/experiment1.txt", true);
+        results_file.write("cheese\n");
+        results_file.write("crumpets\n");
+        results_file.write("ya nan\n");
+        results_file.close();
+
+
+
         // --------decision tree on discrete-----------
 
         accuracies = new double[4][discrete_train_splits.length];
@@ -153,6 +165,7 @@ public class Experiments {
 
             correct = 0;
             total = 0;
+            long time = System.currentTimeMillis();;
 
             for (int i = 0; i < discrete_train_splits.length; i++) {
                 decision_tree.buildClassifier(discrete_train_splits[i]);
@@ -166,6 +179,21 @@ public class Experiments {
                 }
                 accuracy = (double) correct / total;
                 accuracies[y][i] = accuracy;
+            }
+
+            switch(y){
+                case(0):
+                    System.out.printf("IG time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                case(1):
+                    System.out.printf("Ratio time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                case(2):
+                    System.out.printf("Gini time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                default:
+                    System.out.printf("Chi time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
             }
         }
 
@@ -215,6 +243,7 @@ public class Experiments {
 
             correct = 0;
             total = 0;
+            long time = System.currentTimeMillis();
 
             for (int i = 0; i < continuous_train_splits.length; i++) {
                 decision_tree.buildClassifier(continuous_train_splits[i]);
@@ -228,6 +257,21 @@ public class Experiments {
                 }
                 accuracy = (double) correct / total;
                 accuracies[y][i] = accuracy;
+            }
+
+            switch(y){
+                case(0):
+                    System.out.printf("IG time taken on continuous = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                case(1):
+                    System.out.printf("Ratio time taken on continuous = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                case(2):
+                    System.out.printf("Gini time taken on continuous = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
+                default:
+                    System.out.printf("Chi time taken on continuous = %f\n", (double)(System.currentTimeMillis()-time)/1000);
+                    break;
             }
         }
 
@@ -263,6 +307,7 @@ public class Experiments {
         correct = 0;
         total = 0;
         accuracy = 0;
+        long time = System.currentTimeMillis();
 
         for (int i = 0; i < discrete_train_splits.length; i++) {
             id3_tree.buildClassifier(discrete_train_splits[i]);
@@ -277,6 +322,7 @@ public class Experiments {
             accuracy += ((double) correct / total)/discrete_test_splits.length;
         }
 
+        System.out.printf("ID3 time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
         System.out.printf("ID3 averaged accuracy on discrete = %f\n", accuracy);
 
         // ---------------weka j48 classifier----------------
@@ -286,6 +332,7 @@ public class Experiments {
         correct = 0;
         total = 0;
         accuracy = 0;
+        time = System.currentTimeMillis();
 
         for (int i = 0; i < discrete_train_splits.length; i++) {
             j48_tree.buildClassifier(discrete_train_splits[i]);
@@ -300,11 +347,13 @@ public class Experiments {
             accuracy += ((double) correct / total)/discrete_test_splits.length;
         }
 
+        System.out.printf("J48 time taken on discrete = %f\n", (double)(System.currentTimeMillis()-time)/1000);
         System.out.printf("J48 averaged accuracy on discrete = %f\n", accuracy);
 
         correct = 0;
         total = 0;
         accuracy = 0;
+        time = System.currentTimeMillis();
 
         for (int i = 0; i < continuous_train_splits.length; i++) {
             j48_tree.buildClassifier(continuous_train_splits[i]);
@@ -319,6 +368,7 @@ public class Experiments {
             accuracy += ((double) correct / total)/continuous_test_splits.length;
         }
 
+        System.out.printf("J48 time taken on continuous = %f\n", (double)(System.currentTimeMillis()-time)/1000);
         System.out.printf("J48 averaged accuracy on continuous = %f\n", accuracy);
 
 
@@ -327,7 +377,7 @@ public class Experiments {
         }
 
 
-        public static void experiment_3() throws Exception {
+        public static void experiment_2() throws Exception {
             // ---------------- setting up variables for experiment-------------
 
             int correct;
@@ -462,11 +512,354 @@ public class Experiments {
 
             System.out.printf("Tuned tree averaged accuracy on continuous = %f\n", accuracy);
 
+        }
+
+        public static void run_experiment_3_discrete(){
+            experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+            Classifier[] cls = new Classifier[7];
+
+            String[] names = {"CWE", "Randf", "Rotf", "J48", "LADTree", "DStump", "NBayes"};
 
 
+            TreeEnsemble CWE = new TreeEnsemble();
+            RandomForest Randf = new RandomForest();
+            RotationForest Rotf = new RotationForest();
+            J48 J48 = new J48();
+            LADTree LADTree = new LADTree();
+            DecisionStump DStump = new DecisionStump();
+            NaiveBayes NBayes = new NaiveBayes();
 
+            cls[0] = DStump;
+            cls[1] = NBayes;
+            cls[2] = J48;
+            cls[3] = LADTree;
+            cls[4] = CWE;
+            cls[5] = Randf;
+            cls[6] = Rotf;
 
+            expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
+            expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_3/discrete_results/";
+            expSettings.forceEvaluation = false;
+            expSettings.numberOfThreads = 7;
 
+            DatasetLoading.setProportionKeptForTraining(0.8);
+            for (int i = 0; i < cls.length; i++){
+                expSettings.classifier = cls[i];
+                expSettings.estimatorName = names[i];
+                for (int x = 0; x < 5; x++) {
+                    for (String str : DatasetLists.nominalAttributeProblems) {
+                        expSettings.datasetName = str;
+                        expSettings.foldId = x;
+                        expSettings.run();
+                    }
+                }
+            }
+        }
+
+        public static void run_experiment_2_discrete_halfAttr(){
+            experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+            Classifier[] cls = new Classifier[2];
+
+            String[] names = {"Tuned_CWT", "CWE"};
+
+            TunedClassifier Tuned_CWT = new TunedClassifier();
+            TreeEnsemble CWE = new TreeEnsemble();
+
+            ParameterSpace params = new ParameterSpace();
+
+            String[] splitMeasure_values = new String[4];
+            splitMeasure_values[0] = "gain";
+            splitMeasure_values[1] = "ratio";
+            splitMeasure_values[2] = "gini";
+            splitMeasure_values[3] = "chi";
+
+            String[] maxDepth_values = new String[8];
+            maxDepth_values[0] = "1";
+            maxDepth_values[1] = "2";
+            maxDepth_values[2] = "4";
+            maxDepth_values[3] = "8";
+            maxDepth_values[4] = "16";
+            maxDepth_values[5] = "32";
+            maxDepth_values[6] = "64";
+            maxDepth_values[7] = "unlimited";
+
+            params.addParameter("S", splitMeasure_values);
+            params.addParameter("D", maxDepth_values);
+            Tuned_CWT.setClassifier(new CourseworkTree());
+            Tuned_CWT.setParameterSpace(params);
+
+            cls[0] = Tuned_CWT;
+            cls[1] = CWE;
+            expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
+            expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/0.5_attributes/discrete_results/";
+            expSettings.forceEvaluation = false;
+            expSettings.numberOfThreads = 7;
+
+            DatasetLoading.setProportionKeptForTraining(0.8);
+            for (int i = 0; i < cls.length; i++){
+                expSettings.classifier = cls[i];
+                expSettings.estimatorName = names[i];
+                for (int x = 0; x < 5; x++) {
+                    for (String str : DatasetLists.nominalAttributeProblems) {
+                        expSettings.datasetName = str;
+                        expSettings.foldId = x;
+                        expSettings.run();
+                    }
+                }
+            }
+        }
+
+    public static void run_experiment_2_discrete_fullAttr(){
+        experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+        Classifier[] cls = new Classifier[2];
+
+        String[] names = {"Tuned_CWT", "CWE"};
+
+        TunedClassifier Tuned_CWT = new TunedClassifier();
+        TreeEnsemble CWE = new TreeEnsemble();
+        CWE.setSubset_percentage(1.0);
+
+        ParameterSpace params = new ParameterSpace();
+
+        String[] splitMeasure_values = new String[4];
+        splitMeasure_values[0] = "gain";
+        splitMeasure_values[1] = "ratio";
+        splitMeasure_values[2] = "gini";
+        splitMeasure_values[3] = "chi";
+
+        String[] maxDepth_values = new String[8];
+        maxDepth_values[0] = "1";
+        maxDepth_values[1] = "2";
+        maxDepth_values[2] = "4";
+        maxDepth_values[3] = "8";
+        maxDepth_values[4] = "16";
+        maxDepth_values[5] = "32";
+        maxDepth_values[6] = "64";
+        maxDepth_values[7] = "unlimited";
+
+        params.addParameter("S", splitMeasure_values);
+        params.addParameter("D", maxDepth_values);
+        Tuned_CWT.setClassifier(new CourseworkTree());
+        Tuned_CWT.setParameterSpace(params);
+
+        cls[0] = CWE;
+        cls[1] = Tuned_CWT;
+        expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
+        expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/1.0_attributes/discrete_results/";
+        expSettings.forceEvaluation = false;
+        expSettings.numberOfThreads = 7;
+
+        DatasetLoading.setProportionKeptForTraining(0.8);
+        for (int i = 0; i < cls.length; i++){
+            expSettings.classifier = cls[i];
+            expSettings.estimatorName = names[i];
+            for (int x = 0; x < 5; x++) {
+                for (String str : DatasetLists.nominalAttributeProblems) {
+                    expSettings.datasetName = str;
+                    expSettings.foldId = x;
+                    expSettings.run();
+                }
+            }
+        }
+    }
+
+    public static void run_experiment_2_continuous_fullAttr(){
+        experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+        Classifier[] cls = new Classifier[2];
+
+        String[] names = {"Tuned_CWT", "CWE"};
+
+        TunedClassifier Tuned_CWT = new TunedClassifier();
+        TreeEnsemble CWE = new TreeEnsemble();
+        CWE.setSubset_percentage(1.0);
+
+        ParameterSpace params = new ParameterSpace();
+
+        String[] splitMeasure_values = new String[4];
+        splitMeasure_values[0] = "gain";
+        splitMeasure_values[1] = "ratio";
+        splitMeasure_values[2] = "gini";
+        splitMeasure_values[3] = "chi";
+
+        String[] maxDepth_values = new String[8];
+        maxDepth_values[0] = "1";
+        maxDepth_values[1] = "2";
+        maxDepth_values[2] = "4";
+        maxDepth_values[3] = "8";
+        maxDepth_values[4] = "16";
+        maxDepth_values[5] = "32";
+        maxDepth_values[6] = "64";
+        maxDepth_values[7] = "unlimited";
+
+        params.addParameter("S", splitMeasure_values);
+        params.addParameter("D", maxDepth_values);
+        Tuned_CWT.setClassifier(new CourseworkTree());
+        Tuned_CWT.setParameterSpace(params);
+
+        cls[0] = CWE;
+        cls[1] = Tuned_CWT;
+        expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
+        expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/1.0_attributes/continuous_results/";
+        expSettings.forceEvaluation = false;
+        expSettings.numberOfThreads = 7;
+
+        DatasetLoading.setProportionKeptForTraining(0.8);
+        for (int i = 0; i < cls.length; i++){
+            expSettings.classifier = cls[i];
+            expSettings.estimatorName = names[i];
+            for (int x = 0; x < 5; x++) {
+                for (String str : DatasetLists.continuousAttributeProblems) {
+                    expSettings.datasetName = str;
+                    expSettings.foldId = x;
+                    expSettings.run();
+                }
+            }
+        }
+    }
+
+    public static void run_experiment_2_continuous_halfAttr(){
+        experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+        Classifier[] cls = new Classifier[2];
+
+        String[] names = {"Tuned_CWT", "CWE"};
+
+        TunedClassifier Tuned_CWT = new TunedClassifier();
+        TreeEnsemble CWE = new TreeEnsemble();
+
+        ParameterSpace params = new ParameterSpace();
+
+        String[] splitMeasure_values = new String[4];
+        splitMeasure_values[0] = "gain";
+        splitMeasure_values[1] = "ratio";
+        splitMeasure_values[2] = "gini";
+        splitMeasure_values[3] = "chi";
+
+        String[] maxDepth_values = new String[8];
+        maxDepth_values[0] = "1";
+        maxDepth_values[1] = "2";
+        maxDepth_values[2] = "4";
+        maxDepth_values[3] = "8";
+        maxDepth_values[4] = "16";
+        maxDepth_values[5] = "32";
+        maxDepth_values[6] = "64";
+        maxDepth_values[7] = "unlimited";
+
+        params.addParameter("S", splitMeasure_values);
+        params.addParameter("D", maxDepth_values);
+        Tuned_CWT.setClassifier(new CourseworkTree());
+        Tuned_CWT.setParameterSpace(params);
+
+        cls[0] = CWE;
+        cls[1] = Tuned_CWT;
+        expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
+        expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/0.5_attributes/continuous_results/";
+        expSettings.forceEvaluation = false;
+        expSettings.numberOfThreads = 7;
+
+        DatasetLoading.setProportionKeptForTraining(0.8);
+        for (int i = 0; i < cls.length; i++){
+            expSettings.classifier = cls[i];
+            expSettings.estimatorName = names[i];
+            for (int x = 0; x < 5; x++) {
+                for (String str : DatasetLists.continuousAttributeProblems) {
+                    expSettings.datasetName = str;
+                    expSettings.foldId = x;
+                    expSettings.run();
+                }
+            }
+        }
+    }
+
+        public static void run_experiment_1_continuous(){
+            experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+            Classifier[] cls = new Classifier[5];
+
+            String[] names = {"CWT_ig", "CWT_ratio", "CWT_gini", "CWT_chi", "J48"};
+
+            CourseworkTree CWT_ig = new CourseworkTree();
+            CWT_ig.setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+
+            CourseworkTree CWT_ratio = new CourseworkTree();
+            CWT_ratio.setAttSplitMeasure(new IGAttributeSplitMeasure(false));
+
+            CourseworkTree CWT_gini = new CourseworkTree();
+            CWT_gini.setAttSplitMeasure(new GiniAttributeSplitMeasure());
+
+            CourseworkTree CWT_chi = new CourseworkTree();
+            CWT_chi.setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+
+            J48 J48 = new J48();
+
+            cls[0] = CWT_ig;
+            cls[1] = CWT_ratio;
+            cls[2] = CWT_gini;
+            cls[3] = CWT_chi;
+            cls[4] = J48;
+
+            expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
+            expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_1/continuous_results/";
+            expSettings.forceEvaluation = false;
+            expSettings.numberOfThreads = 7;
+
+            DatasetLoading.setProportionKeptForTraining(0.8);
+            for (int i = 0; i < cls.length; i++){
+                expSettings.classifier = cls[i];
+                expSettings.estimatorName = names[i];
+                for (int x = 0; x < 5; x++) {
+                    for (String str : DatasetLists.continuousAttributeProblems) {
+                        expSettings.datasetName = str;
+                        expSettings.foldId = x;
+                        expSettings.run();
+                    }
+                }
+        }
+    }
+
+        public static void run_experiment_1_discrete(){
+            experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+            Classifier[] cls = new Classifier[6];
+
+            String[] names = {"CWT_ig", "CWT_ratio", "CWT_gini", "CWT_chi", "ID3", "J48"};
+
+            CourseworkTree CWT_ig = new CourseworkTree();
+            CWT_ig.setAttSplitMeasure(new IGAttributeSplitMeasure(true));
+
+            CourseworkTree CWT_ratio = new CourseworkTree();
+            CWT_ratio.setAttSplitMeasure(new IGAttributeSplitMeasure(false));
+
+            CourseworkTree CWT_gini = new CourseworkTree();
+            CWT_gini.setAttSplitMeasure(new GiniAttributeSplitMeasure());
+
+            CourseworkTree CWT_chi = new CourseworkTree();
+            CWT_chi.setAttSplitMeasure(new ChiSquaredAttributeSplitMeasure());
+
+            Id3 ID3 = new Id3();
+            J48 J48 = new J48();
+
+            cls[0] = CWT_ig;
+            cls[1] = CWT_ratio;
+            cls[2] = CWT_gini;
+            cls[3] = CWT_chi;
+            cls[4] = ID3;
+            cls[5] = J48;
+
+            expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
+            expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_1/discrete_results/";
+            expSettings.forceEvaluation = false;
+            expSettings.numberOfThreads = 7;
+
+            DatasetLoading.setProportionKeptForTraining(0.8);
+            for (int i = 0; i < cls.length; i++){
+                expSettings.classifier = cls[i];
+                expSettings.estimatorName = names[i];
+                for (int x = 0; x < 5; x++) {
+                    for (String str : DatasetLists.nominalAttributeProblems) {
+                        expSettings.datasetName = str;
+                        expSettings.foldId = x;
+                        expSettings.run();
+                    }
+                }
+            }
 
 
 
@@ -477,10 +870,8 @@ public class Experiments {
 
 
 
-
-
     public static void main(String[] args) throws Exception {
-        //Experiments.experiment_1();
-        Experiments.experiment_3();
+        Experiments.run_experiment_3_discrete();
+
     }
 }

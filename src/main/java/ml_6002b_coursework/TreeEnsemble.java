@@ -53,11 +53,11 @@ public class TreeEnsemble extends AbstractClassifier {
         Random rand = new Random();
 
         input_format = data;
-        att_selections = new int[numTrees][(int) (data.numAttributes()*subset_percentage)+1];
+        att_selections = new int[numTrees][(int) (data.numAttributes()*subset_percentage)];
 
         int att_index;
 
-        int[] atts_to_keep = new int[((int) (data.numAttributes()*subset_percentage))+1];
+        int[] atts_to_keep = new int[((int) (data.numAttributes()*subset_percentage))];
 
         Remove removeFilter = new Remove();
 
@@ -70,8 +70,14 @@ public class TreeEnsemble extends AbstractClassifier {
                 att_list.add(y);
             }
 
-            for (int x = 0; x < (int)data.numAttributes()*subset_percentage; x++){
-                att_index = rand.nextInt(att_list.size()-1);
+
+            for (int x = 0; x < (int)data.numAttributes()*subset_percentage-1; x++){
+                if (att_list.size()-1 == 0){
+                    att_index = 0;
+                }
+                else {
+                    att_index = rand.nextInt(att_list.size() - 1);
+                }
                 atts_to_keep[x] = att_list.get(att_index);
                 att_list.remove(att_index);
             }
@@ -83,7 +89,7 @@ public class TreeEnsemble extends AbstractClassifier {
             folds[i] = Filter.useFilter(data, removeFilter);
             att_list.clear();
             att_selections[i] = atts_to_keep;
-            atts_to_keep = new int[(int) (data.numAttributes()*subset_percentage)+1];
+            atts_to_keep = new int[(int) (data.numAttributes()*subset_percentage)];
         }
 
         for (Instances fold:folds){
@@ -237,8 +243,9 @@ public class TreeEnsemble extends AbstractClassifier {
         Instances train_split = Filter.useFilter(data, filter);
 
         TreeEnsemble ensemble = new TreeEnsemble();
-        ensemble.buildClassifier(train_split);
         ensemble.setAverageDistributions(true);
+        ensemble.buildClassifier(train_split);
+
 
         int correct = 0;
         int total = 0;
@@ -284,8 +291,9 @@ public class TreeEnsemble extends AbstractClassifier {
         train_split = Filter.useFilter(data, filter);
 
         ensemble = new TreeEnsemble();
-        ensemble.buildClassifier(train_split);
         ensemble.setAverageDistributions(true);
+        ensemble.buildClassifier(train_split);
+
 
         correct = 0;
         total = 0;
