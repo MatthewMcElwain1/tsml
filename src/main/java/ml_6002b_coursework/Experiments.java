@@ -514,6 +514,38 @@ public class Experiments {
 
         }
 
+        public static void run_experiment_4_normal() throws IOException {
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/case_study/EOGVerticalSignal/EOGVerticalSignal_TRAIN.arff"));
+            Instances train = new Instances(reader);
+            reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/case_study/EOGVerticalSignal/EOGVerticalSignal_TEST.arff"));
+            Instances test = new Instances(reader);
+
+
+
+//            experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+//            Classifier[] cls = new Classifier[1];
+//
+//            String[] names = {"Rotf"};
+//
+//            cls[0] = new RotationForest();
+//
+//            expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/case_study/EOGVerticalSignal/";
+//            expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_4/normal";
+//            expSettings.forceEvaluation = false;
+//            expSettings.numberOfThreads = 7;
+//
+//            DatasetLoading.setProportionKeptForTraining(0.8);
+//            for (int i = 0; i < cls.length; i++){
+//                expSettings.classifier = cls[i];
+//                expSettings.estimatorName = names[i];
+//                for (int x = 0; x < 5; x++) {
+//                    expSettings.foldId = x;
+//                    expSettings.run();
+//
+//                }
+//            }
+        }
+
         public static void run_experiment_3_discrete(){
             experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
             Classifier[] cls = new Classifier[7];
@@ -871,6 +903,7 @@ public class Experiments {
 
 
     public static void main(String[] args) throws Exception {
+        // built in tsml experiments use resampling to split the data
         Experiments.run_experiment_3_discrete();
 
     }
