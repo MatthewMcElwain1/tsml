@@ -545,13 +545,50 @@ public class Experiments {
 //                }
 //            }
         }
+    public static void run_experiment_3_continuous(){
+        experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
+        Classifier[] cls = new Classifier[6];
+
+        String[] names = {"CWE", "Randf", "Rotf", "J48", "LADTree", "DStump"};
+
+        TreeEnsemble CWE = new TreeEnsemble();
+        RandomForest Randf = new RandomForest();
+        RotationForest Rotf = new RotationForest();
+        J48 J48 = new J48();
+        LADTree LADTree = new LADTree();
+        DecisionStump DStump = new DecisionStump();
+
+        cls[0] = CWE;
+        cls[1] = Randf;
+        cls[2] = Rotf;
+        cls[3] = J48;
+        cls[4] = LADTree;
+        cls[5] = DStump;
+
+        expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
+        expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_3/continuous_results/";
+        expSettings.forceEvaluation = false;
+        expSettings.numberOfThreads = 7;
+
+        DatasetLoading.setProportionKeptForTraining(0.8);
+        for (int i = 0; i < cls.length; i++){
+            expSettings.classifier = cls[i];
+            expSettings.estimatorName = names[i];
+            for (int x = 0; x < 5; x++) {
+                for (String str : DatasetLists.continuousAttributeProblems) {
+                    expSettings.datasetName = str;
+                    expSettings.foldId = x;
+                    expSettings.run();
+                }
+            }
+        }
+    }
 
         public static void run_experiment_3_discrete(){
             experiments.ExperimentalArguments expSettings = new ExperimentalArguments();
-            Classifier[] cls = new Classifier[7];
+            Classifier[] cls = new Classifier[6];
 
-            String[] names = {"CWE", "Randf", "Rotf", "J48", "LADTree", "DStump", "NBayes"};
-
+            String[] names = {"CWE", "Randf", "Rotf", "J48", "LADTree", "DStump"};
 
             TreeEnsemble CWE = new TreeEnsemble();
             RandomForest Randf = new RandomForest();
@@ -559,15 +596,13 @@ public class Experiments {
             J48 J48 = new J48();
             LADTree LADTree = new LADTree();
             DecisionStump DStump = new DecisionStump();
-            NaiveBayes NBayes = new NaiveBayes();
 
-            cls[0] = DStump;
-            cls[1] = NBayes;
-            cls[2] = J48;
-            cls[3] = LADTree;
-            cls[4] = CWE;
-            cls[5] = Randf;
-            cls[6] = Rotf;
+            cls[0] = CWE;
+            cls[1] = Randf;
+            cls[2] = Rotf;
+            cls[3] = J48;
+            cls[4] = LADTree;
+            cls[5] = DStump;
 
             expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
             expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_3/discrete_results/";
@@ -674,8 +709,8 @@ public class Experiments {
         Tuned_CWT.setClassifier(new CourseworkTree());
         Tuned_CWT.setParameterSpace(params);
 
-        cls[0] = CWE;
-        cls[1] = Tuned_CWT;
+        cls[0] = Tuned_CWT;
+        cls[1] = CWE;
         expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Discrete";
         expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/1.0_attributes/discrete_results/";
         expSettings.forceEvaluation = false;
@@ -728,8 +763,8 @@ public class Experiments {
         Tuned_CWT.setClassifier(new CourseworkTree());
         Tuned_CWT.setParameterSpace(params);
 
-        cls[0] = CWE;
-        cls[1] = Tuned_CWT;
+        cls[0] = Tuned_CWT;
+        cls[1] = CWE;
         expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
         expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/1.0_attributes/continuous_results/";
         expSettings.forceEvaluation = false;
@@ -781,8 +816,8 @@ public class Experiments {
         Tuned_CWT.setClassifier(new CourseworkTree());
         Tuned_CWT.setParameterSpace(params);
 
-        cls[0] = CWE;
-        cls[1] = Tuned_CWT;
+        cls[0] = Tuned_CWT;
+        cls[1] = CWE;
         expSettings.dataReadLocation = "src/main/java/ml_6002b_coursework/UCI Continuous";
         expSettings.resultsWriteLocation = "src/main/java/ml_6002b_coursework/experiment_results/experiment_2/0.5_attributes/continuous_results/";
         expSettings.forceEvaluation = false;
@@ -904,7 +939,14 @@ public class Experiments {
 
     public static void main(String[] args) throws Exception {
         // built in tsml experiments use resampling to split the data
+        Experiments.run_experiment_2_discrete_fullAttr();
+        Experiments.run_experiment_2_discrete_halfAttr();
+
+        Experiments.run_experiment_2_continuous_fullAttr();
+        Experiments.run_experiment_2_continuous_halfAttr();
+
         Experiments.run_experiment_3_discrete();
+        Experiments.run_experiment_3_continuous();
 
     }
 }

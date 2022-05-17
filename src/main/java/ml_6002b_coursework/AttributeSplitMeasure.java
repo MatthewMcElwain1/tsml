@@ -1,9 +1,7 @@
 package ml_6002b_coursework;
-
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-
 import java.util.Arrays;
 import java.util.Enumeration;
 
@@ -22,11 +20,12 @@ public abstract class AttributeSplitMeasure {
 
     public Instances[] compute_best_split(Instances data, Attribute att){
         Instances[] splitDataNumeric = new Instances[2];
-        // https://medium.com/geekculture/handling-continuous-attributes-in-decision-trees-bbc044986621
         // working out best split value
         double[] test = data.attributeToDoubleArray(att.index());
         double median;
+        // sort the values
         Arrays.sort(test);
+        // calculate the median
         if (test.length%2==1){
             median = test[(int) (test.length / 2 + 0.5)];
             for (int i = 0; i < 2; i++) {
@@ -39,17 +38,20 @@ public abstract class AttributeSplitMeasure {
                 splitDataNumeric[i] = new Instances(data, test.length/2);
             }
         }
+        // set the median split value
         this.median = median;
         return splitDataNumeric;
     }
 
     public Instances[] splitDataOnNumeric(Instances data, Attribute att){
-       Instances[] splitDataNumeric = compute_best_split(data, att);
+        // compute the median split value
+        Instances[] splitDataNumeric = compute_best_split(data, att);
         // performing the split
         for (Instance instance:data){
             if (instance.value(att) >= median){
                 splitDataNumeric[0].add(instance);
             }
+
             else{
                 splitDataNumeric[1].add(instance);
             }

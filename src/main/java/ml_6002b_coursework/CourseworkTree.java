@@ -328,7 +328,6 @@ public class CourseworkTree extends AbstractClassifier {
         Instances data = new Instances(reader);
         data.setClassIndex(data.numAttributes()-1);
 
-
         // https://stackoverflow.com/questions/28123954/how-do-i-divide-a-dataset-into-training-and-test-sets-using-weka
         StratifiedRemoveFolds filter = new StratifiedRemoveFolds();
 

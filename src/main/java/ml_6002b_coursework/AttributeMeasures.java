@@ -238,15 +238,17 @@ public class AttributeMeasures {
         return (double)Math.round(chi_squared*100)/100;
 
     }
+
     /**
      * Main method.
      *
      * @param args the options for the attribute measure main
      */
+
     public static void main(String[] args) throws Exception {
         int[][] data = {{0,5},{1,0}};
 
-        BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\matth\\Documents\\UEA-TSML\\src\\main\\java\\ml_6002b_coursework\\Whiskey.arff"));
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/Whiskey.arff"));
         Instances test = new Instances(reader);
 
         BufferedReader test1 = new BufferedReader(new FileReader("src/main/java/ml_6002b_coursework/test_data/Chinatown.arff"));

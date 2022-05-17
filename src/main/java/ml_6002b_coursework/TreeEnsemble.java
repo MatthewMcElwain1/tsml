@@ -1,5 +1,4 @@
 package ml_6002b_coursework;
-
 import tsml.classifiers.distance_based.utils.collections.tree.Tree;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
@@ -201,7 +200,6 @@ public class TreeEnsemble extends AbstractClassifier {
             removeFilter.setInputFormat(input_format);
             removeFilter.input(instance);
             Instance temp = removeFilter.output();
-
 
             test[i] = classifiers.get(i).distributionForInstance(temp);
         }
